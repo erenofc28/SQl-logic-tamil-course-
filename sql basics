@@ -1,0 +1,269 @@
+-- own code
+
+-- creating database
+create database employees;
+-- selecting db for current operations
+use employees;
+
+-- creating table with columns
+create table emp_details(
+_id int primary key, -- primary key is must for a table 
+_name varchar(10), -- varchar is a datatype (like a string)
+job_des varchar(10)
+); 
+
+-- inserting values into the table  
+insert into emp_details values(1,"dhinesh","web dev",20000);
+insert into emp_details values(2,"eren","hr",50000);
+insert into emp_details values(3,"luffy","manager",60000);
+
+-- delete table
+drop table emp_details;
+
+-- updating columns in current table
+alter table emp_details add salary int;
+
+-- select used to display, where is like an if statement (Condition based) , order by(sorting)
+select * from emp_details
+where job_des = "hr"
+order by job_des;
+
+-- to use update and delete
+SET SQL_SAFE_UPDATES = 0;
+insert into emp_details values(5,"eren3","hr",50000);
+
+-- updating values
+update emp_details 
+set job_des = "admin"
+where job_des = "manager";
+
+-- deleting values
+delete from emp_details
+where _id = 1;
+
+-- showing particular cols and custom sorting(order by)
+select job_des from emp_details
+order by(case job_des 
+when 'admin' then 1
+when 'hr' then 2
+else 100 end);
+
+-- functions  
+select count(*) from emp_details;
+select avg(salary) from emp_details;
+select sum(salary) from emp_details;
+select max(salary) from emp_details;
+select min(salary) from emp_details;
+
+-- string functions
+select ucase(_name) from emp_details;
+select char_length(_name) from emp_details;
+select concat('mr ',_name) from emp_details;
+select concat('mr ',_name ,'=>',format(salary,0)) from emp_details;
+select _name, right(job_des,3) from emp_details;
+select _name, left(job_des,3) from emp_details;
+
+-- date
+select now();
+select curdate();
+select date_format(curdate(),"%d/%m/%y");
+select datediff(curdate(),"2025/04/20") as days;
+select date_add(curdate(),interval 1 day) as "after one day";
+
+-- group by
+select job_des,avg(salary) from emp_details
+group by job_des
+having avg(salary)> 55000;
+
+use employees;
+-- constrains
+create table connect(
+emp_id int primary key auto_increment,
+ename varchar(20) ,
+job_des varchar (10) unique,
+salary int,
+check (salary > 10000));
+
+drop table connect;
+insert into connect(ename,salary) values("name",1007770);
+
+-- add constraint after creating a table(not null)
+alter table connect
+modify ename varchar(10) not null;
+
+-- removing not null
+alter table connect
+modify ename varchar(10);
+
+-- add default constraint
+alter table connect
+alter job_des set default "unassigned";
+
+-- drop default
+alter table connect
+alter job_des drop default;
+
+-- add check
+alter table connect
+add constraint chk check (salary > 10);
+
+-- drop check
+alter table connect
+drop check chk;
+
+select * from connect;
+describe table connect;
+
+-- foreign key
+create table branch(
+name varchar(10),
+branch_id int primary key
+);
+
+create table location(
+id int primary key,
+branch_id int ,
+constraint fk foreign key(branch_id) references branch(branch_id)
+on delete set null,
+location varchar(10)
+);
+use employees;
+drop table location;
+drop table branch;
+insert into branch values('dhinesh',5);
+insert into location(id,location) values(5,'chennai');
+
+-- drop foreign key
+alter table location
+drop foreign key fk;
+
+select * from location;
+select * from branch;
+
+-- index
+-- add index
+create index name_ind on location (location);
+
+-- remove index
+alter table location
+drop index name_ind;
+
+show index from location;
+
+-- on delete
+create table location(
+id int primary key,
+branch_id int ,
+constraint fk foreign key(branch_id) references branch(branch_id)
+on delete set null, 
+location varchar(10)
+);
+
+create table location(
+id int primary key,
+branch_id int ,
+constraint fk foreign key(branch_id) references branch(branch_id)
+on delete cascade, 
+location varchar(10)
+);
+
+-- basic join
+
+create table table1 (
+id int primary key,
+name varchar(10)
+);
+
+create table table2 (
+id int primary key,
+location varchar(10)
+);
+
+insert into table1 values(1,"dhinesh");
+insert into table2 values(1,'chennai');
+insert into table1 values(2,"hello");
+insert into table2 values(2,"banglore");
+insert into table1 values(6,'eren');
+insert into table2 values(3,'wano');
+select * from table1;
+select * from table2;
+delete from table1
+where id = 3;
+
+-- inner join
+select table1.id,table1.name,table2.location
+from table1
+inner join table2
+on table1.id = table2.id
+order by table1.id
+;
+
+-- left join
+select table1.id,table1.name,table2.location
+from table1
+left join table2
+on table1.id = table2.id
+order by table1.id
+;
+
+-- right join
+select table1.id,table1.name,table2.location
+from table1
+right join table2
+on table1.id = table2.id
+order by table1.id
+;
+
+-- cross join
+select table1.id,table1.name,table2.location
+from table1
+cross join table2
+;
+
+-- union
+select * from table1
+union 
+select * from table2;
+
+-- sub queires
+select * from table1
+where id = (select id from table1 where name = "eren");
+
+-- shows minimum values(compared by id) details
+select * from table1
+where id = (select min(id) from table1);
+
+-- exists
+select id ,name 
+from table1
+where exists(
+select 1 from table1
+where id = 1
+);
+
+-- any
+select * from table1
+where id = any(
+select id from table1 
+where id >1
+);
+
+-- all
+select * from table1
+where id <> all(
+select id from table1 where id in (6,1)
+);
+
+-- view keyword
+
+-- view (create)
+create view show_name as select name from table1;
+
+-- show view
+select * from show_name;
+
+-- modify view
+create or replace view show_name as select name from table1 where name = "dhinesh";
+
+-- delete view
+drop view show_name;
